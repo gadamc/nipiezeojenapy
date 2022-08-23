@@ -17,7 +17,7 @@ class PiezoControl:
         return microns / self.scale_microns_per_volt
 
     def _volts_to_microns(self, volts: float) -> float:
-        return  self.scale_microns_per_volts * volts
+        return  self.scale_microns_per_volt * volts
 
     def go_to_position(self, x: float = None,
                              y: float = None,
@@ -25,19 +25,19 @@ class PiezoControl:
 
         if x:
             with nidaqmx.Task() as task:
-                task.ao_channels.add_ao_voltage_chan(dev_name + '/' + self.write_channels[0])
+                task.ao_channels.add_ao_voltage_chan(self.device_name + '/' + self.write_channels[0])
                 task.write(self._microns_to_volts(x))
                 self.last_write_values[0] = self._microns_to_volts(x)
 
         if y:
             with nidaqmx.Task() as task:
-                task.ao_channels.add_ao_voltage_chan(dev_name + '/' + self.write_channels[1])
+                task.ao_channels.add_ao_voltage_chan(self.device_name + '/' + self.write_channels[1])
                 task.write(self._microns_to_volts(y))
                 self.last_write_values[1] = self._microns_to_volts(y)
 
         if z:
             with nidaqmx.Task() as task:
-                task.ao_channels.add_ao_voltage_chan(dev_name + '/' + self.write_channels[2])
+                task.ao_channels.add_ao_voltage_chan(self.device_name + '/' + self.write_channels[2])
                 task.write(self._microns_to_volts(z))
                 self.last_write_values[2] = self._microns_to_volts(z)
 
@@ -47,9 +47,7 @@ class PiezoControl:
             return self.last_write_values
 
         output = [-1,-1,-1]
-        with nidaqmx.Task('xr') as xread,
-             nidaqmx.Task('yr') as yread,
-             nidaqmx.Task('zr') as zread:
+        with nidaqmx.Task('xr') as xread, nidaqmx.Task('yr') as yread, nidaqmx.Task('zr') as zread:
 
              xread.ai_channels.add_ai_voltage_chan(self.device_name + '/' + self.read_channels[0])
              yread.ai_channels.add_ai_voltage_chan(self.device_name + '/' + self.read_channels[1])
