@@ -22,26 +22,52 @@ long as the access is not simultaneous.
 
 ## Installation
 
-### Requirements
+#### Requirements
 
 ```
 pip install nidaqmx
 ```
-
 
 ### Local Installation
 
 ```
 git clone https://github.com/gadamc/nipiezojenapy
 cd nipiezojenapy
-python setup.py install
+python -m pip install .
 ```
 
 ## Usage
 
+### Instantiate
+
+```
+import nipiezojena
+pcon = nipiezojena.PiezoControl('Dev1',['ao0','ao1','ao2'], ['ai0','ai1','ai2'])
+```
+
+### Read Position
+
+```
+print(pcon.get_current_position())
+[39.953595487425225, 40.047631567251806, 39.9510191567554]
+```
+
+### Go To Position
+
+```
+pcon.go_to_position(x = 20, y = 20, z = 20)
+pcon.get_current_position()
+[19.935887437291537, 19.94876864898489, 19.872769502734947]
+```
+
+Note that each axis can be set independently. Thus one can call
+
+```
+pcon.go_to_position(z = 40)
+pcon.get_current_position()
+[19.913989377848296, 19.988700406441584, 39.91623869419529]
+```
 
 # LICENSE
 
 [LICENCE](LICENSE)
-
-##### Acknowledgments
