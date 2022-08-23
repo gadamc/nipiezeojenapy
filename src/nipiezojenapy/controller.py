@@ -33,19 +33,19 @@ class PiezoControl:
             with nidaqmx.Task() as task:
                 task.ao_channels.add_ao_voltage_chan(self.device_name + '/' + self.write_channels[0])
                 task.write(self._microns_to_volts(x))
-                self.last_write_values[0] = self._microns_to_volts(x)
+                self.last_write_values[0] = x
 
         if y:
             with nidaqmx.Task() as task:
                 task.ao_channels.add_ao_voltage_chan(self.device_name + '/' + self.write_channels[1])
                 task.write(self._microns_to_volts(y))
-                self.last_write_values[1] = self._microns_to_volts(y)
+                self.last_write_values[1] = y
 
         if z:
             with nidaqmx.Task() as task:
                 task.ao_channels.add_ao_voltage_chan(self.device_name + '/' + self.write_channels[2])
                 task.write(self._microns_to_volts(z))
-                self.last_write_values[2] = self._microns_to_volts(z)
+                self.last_write_values[2] = z
 
 
     def get_current_position(self) -> list[float]:
