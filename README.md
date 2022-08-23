@@ -41,8 +41,10 @@ python -m pip install .
 ### Instantiate
 
 ```
-import nipiezojena
-pcon = nipiezojena.PiezoControl('Dev1',['ao0','ao1','ao2'], ['ai0','ai1','ai2'])
+import nipiezojenapy
+pcon = nipiezojenapy.PiezoControl(device_name = 'Dev1',
+                                  write_channels = ['ao0','ao1','ao2'],
+                                  read_channels = ['ai0','ai1','ai2'])
 ```
 
 ### Read Position
@@ -60,7 +62,8 @@ pcon.get_current_position()
 [19.935887437291537, 19.94876864898489, 19.872769502734947]
 ```
 
-Note that each axis can be set independently. Thus one can call
+Note that each axis can be set independently. That is, one may move along
+a single axis without specifying the other axis values.
 
 ```
 pcon.go_to_position(z = 40)

@@ -22,6 +22,12 @@ class PiezoControl:
     def go_to_position(self, x: float = None,
                              y: float = None,
                              z: float = None) -> None:
+        '''
+        Sets the x,y,z position in microns.
+
+        You do not need to specify all three axis values in order
+        to move in one direction. For example, you can call: go_to_position(z = 40)
+        '''
 
         if x:
             with nidaqmx.Task() as task:
@@ -43,6 +49,10 @@ class PiezoControl:
 
 
     def get_current_position(self) -> list[float]:
+        '''
+        Returns the x,y,z position in microns
+        '''
+
         if self.read_channels is None:
             return self.last_write_values
 
