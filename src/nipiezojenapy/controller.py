@@ -1,5 +1,6 @@
 import nidaqmx
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,8 @@ class PiezoControl:
                 task.ao_channels.add_ao_voltage_chan(self.device_name + '/' + self.write_channels[2])
                 task.write(self._microns_to_volts(z))
                 self.last_write_values[2] = z
+
+        time.sleep(0.1) #wait 100 milliseconds to ensure piezo actuator has settled into position.
 
     def step(self, dx: float = None,
                    dy: float = None,
