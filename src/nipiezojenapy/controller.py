@@ -1,14 +1,15 @@
 import nidaqmx
 import logging
 import time
+from typing import List
 
 logger = logging.getLogger(__name__)
 
 class PiezoControl:
 
     def __init__(self, device_name: str,
-                       write_channels: list[str] = ['ao0','ao1','ao2'],
-                       read_channels: list[str] = None,
+                       write_channels: List[str] = ['ao0','ao1','ao2'],
+                       read_channels: List[str] = None,
                        scale_microns_per_volt = 8) -> None:
 
         self.device_name = device_name
@@ -104,7 +105,7 @@ class PiezoControl:
             except ValueError as e:
                 logger.error(f'Trying to step outside of allowed range ({self.minimum_allowed_position:.2f}, {self.maximum_allowed_position:.2f}).')
 
-    def get_current_position(self) -> list[float]:
+    def get_current_position(self) -> List[float]:
         '''
         Returns the x,y,z position in microns
 
@@ -118,7 +119,7 @@ class PiezoControl:
         else:
             return [self._volts_to_microns(v) for v in self.get_current_voltage()]
 
-    def get_current_voltage(self) -> list[float]:
+    def get_current_voltage(self) -> List[float]:
         '''
         Returns the voltage supplied to the three input analog channels.
 
