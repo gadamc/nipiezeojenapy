@@ -1,0 +1,162 @@
+import argparse
+import tkinter as tk
+import tkinter.ttk as ttk
+import logging
+
+import nipiezojenapy
+
+logger = logging.getLogger(__name__)
+
+parser = argparse.ArgumentParser(description='Jena Piezo Scanner Control',
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+parser.add_argument('-d', '--daq-name', default = 'Dev1', type=str, metavar = 'daq_name',
+                    help='NI DAQ Device Name')
+parser.add_argument('--piezo-write-channels', metavar = '<ch0,ch1,ch2>', default = 'ao0,ao1,ao2', type=str,
+                    help='List of analog output channels used to control the piezo position')
+parser.add_argument('--piezo-read-channels', metavar = '<ch0,ch1,ch2>', default = 'ai0,ai1,ai2', type=str,
+                    help='List of analog input channels used to read the piezo position')
+args = parser.parse_args()
+
+class MainApplicationView():
+    def __init__(self, main_frame):
+
+        self.current_position = {'x':-1, 'y':-1, 'z':-1}
+        self._build_frame(main_frame)
+
+    def _build_frame(self, main_frame):
+        frame = tk.Frame(main_frame)
+        frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        row = 0
+        #left of the separator
+        tk.Label(frame, text='Step Changes').grid(row=row, column=0, columnspan =3)
+
+        ttk.Separator(frame, orient='vertical').grid(column=3, row=row, rowspan=5, sticky='ns')
+
+        #right of the separator
+        self.go_to_position_button = tk.Button(frame, text="Go To Position")
+        self.go_to_position_button.grid(row=row, column=4, columnspan = 3, padx=5)
+
+        row += 1
+        #left of the separator
+        self.minus_x_button = tk.Button(frame, text="-")
+        self.minus_x_button.grid(row=row, column=0,pady = 5)
+        self.current_x_pos_text = tk.StringVar()
+        tk.Label(frame, textvariable=self.current_x_pos_text).grid(row=row, column=1)
+        self.plus_x_button = tk.Button(frame, text="+")
+        self.plus_x_button.grid(row=row, column=2, padx=(5,0))
+
+        #right of the separator
+        tk.Label(frame, text='x (um): ').grid(row=row, column=4, padx = 5, pady=5)
+        self.go_to_x_position_entry = tk.Entry(frame, width=4)
+        self.go_to_x_position_entry.insert(5, 20.0)
+        self.go_to_x_position_entry.grid(row=row, column=5)
+
+        row += 1
+        #left of the separator
+        self.minus_y_button = tk.Button(frame, text="-")
+        self.minus_y_button.grid(row=row, column=0)
+        self.current_y_pos_text = tk.StringVar()
+        tk.Label(frame, textvariable=self.current_y_pos_text).grid(row=row, column=1)
+        self.plus_y_button = tk.Button(frame, text="+")
+        self.plus_y_button.grid(row=row, column=2, padx=(5,0))
+
+        #right of the separator
+        tk.Label(frame, text='y (um): ').grid(row=row, column=4, padx = 5, pady=5)
+        self.go_to_y_position_entry = tk.Entry(frame, width=4)
+        self.go_to_y_position_entry.insert(5, 20.0)
+        self.go_to_y_position_entry.grid(row=row, column=5)
+
+        row += 1
+        #left of the separator
+        self.minus_z_button = tk.Button(frame, text="-")
+        self.minus_z_button.grid(row=row, column=0)
+        self.current_z_pos_text = tk.StringVar()
+        tk.Label(frame, textvariable=self.current_z_pos_text).grid(row=row, column=1)
+        self.plus_z_button = tk.Button(frame, text="+")
+        self.plus_z_button.grid(row=row, column=2, padx=(5,0))
+
+        #right of the separator
+        tk.Label(frame, text='z (um): ').grid(row=row, column=4, padx = 5, pady=5)
+        self.go_to_z_position_entry = tk.Entry(frame, width=4)
+        self.go_to_z_position_entry.insert(5, 20.0)
+        self.go_to_z_position_entry.grid(row=row, column=5)
+
+        row += 1
+        #left of the separator
+        tk.Label(frame, text='step size (um): ').grid(row=row, column=0,  pady=5, columnspan=2)
+        self.step_size_entry = tk.Entry(frame, width=4)
+        self.step_size_entry.insert(5, 0.25)
+        self.step_size_entry.grid(row=row, column=2)
+
+        row += 1
+        #left of the separator
+        self.read_position_button = tk.Button(frame, text="Refresh Position")
+        self.read_position_button.grid(row=row, column=0, pady = 5, columnspan=2)
+
+        self.update_position(20,20,20)
+
+    def update_position(self, x = None, y = None, z = None):
+
+        if x is not None:
+            self.current_position['x'] = x
+            self.current_x_pos_text.set(f'x: {x:.2f}')
+        if y is not None:
+            self.current_position['y'] = y
+            self.current_y_pos_text.set(f'y: {y:.2f}')
+        if z is not None:
+            self.current_position['z'] = z
+            self.current_z_pos_text.set(f'z: {z:.2f}')
+
+class MainTkApplication():
+
+    def __init__(self):
+        self.root = tk.Tk()
+        self.controller = nipiezojenapy.PiezoControl(device_name = args.daq_name,
+                                      write_channels = args.piezo_write_channels.split(','),
+                                      read_channels = args.piezo_read_channels.split(','))
+
+        self.view = MainApplicationView(self.root)
+        self.view.plus_x_button.bind("<Button>",  lambda e: self._move('x',1))
+        self.view.minus_x_button.bind("<Button>", lambda e: self._move('x',-1))
+        self.view.plus_y_button.bind("<Button>",  lambda e: self._move('y',1))
+        self.view.minus_y_button.bind("<Button>", lambda e: self._move('y',-1))
+        self.view.plus_z_button.bind("<Button>",  lambda e: self._move('z',1))
+        self.view.minus_z_button.bind("<Button>", lambda e: self._move('z',-1))
+
+        self.view.go_to_position_button.bind("<Button>", lambda e: self.go_to_position())
+        self.view.read_position_button.bind("<Button>", lambda e: self.update_position())
+
+        #self.update_position()
+    def run(self):
+        self.root.title("NiDAQ - Jena Piezo Control")
+        self.root.deiconify()
+        self.root.mainloop()
+
+    def _move(self, axis, direction=1):
+        delta = float(self.view.step_size_entry.get())
+        current = self.view.current_position[axis]
+        new = current + direction*delta
+        kwargs = {axis:new}
+        #self.controller.go_to_position(**kwargs)
+        print(f'moving {axis}: {current:.2f} -> {new:.2f}')
+        self.view.update_position(**kwargs)
+
+    def update_position(self):
+        x, y, z = self.controller.get_current_position()
+        self.view.update_position(x,y,z)
+
+    def go_to_position(self):
+        gotox = float(self.view.go_to_x_position_entry.get())
+        gotoy = float(self.view.go_to_y_position_entry.get())
+        gotoz = float(self.view.go_to_z_position_entry.get())
+        print(f'go to: {gotox:.2f}, {gotoy:.2f}, {gotoz:.2f}')
+        self.view.update_position(gotox,gotoy,gotoz)
+
+def main():
+    tkapp = MainTkApplication()
+    tkapp.run()
+
+if __name__ == '__main__':
+    main()
