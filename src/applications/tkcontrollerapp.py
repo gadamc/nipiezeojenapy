@@ -5,7 +5,6 @@ import logging
 
 import nipiezojenapy
 
-logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description='Jena Piezo Scanner Control',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -16,7 +15,14 @@ parser.add_argument('--piezo-write-channels', metavar = '<ch0,ch1,ch2>', default
                     help='List of analog output channels used to control the piezo position')
 parser.add_argument('--piezo-read-channels', metavar = '<ch0,ch1,ch2>', default = 'ai0,ai1,ai2', type=str,
                     help='List of analog input channels used to read the piezo position')
+parser.add_argument('-q', '--quiet', action = 'store_true',
+                    help='When true,logger level will be set to warning. Otherwise, set to "info".')
 args = parser.parse_args()
+
+logger = logging.getLogger(__name__)
+logging.basicConfig()
+if args.quiet is False:
+    logger.setLevel(level=logging.INFO)
 
 class MainApplicationView():
     def __init__(self, main_frame):
@@ -101,13 +107,13 @@ class MainApplicationView():
 
         if x is not None:
             self.current_position['x'] = x
-            self.current_x_pos_text.set(f'x: {x:.2f}')
+            self.current_x_pos_text.set(f'x: {x:.3f}')
         if y is not None:
             self.current_position['y'] = y
-            self.current_y_pos_text.set(f'y: {y:.2f}')
+            self.current_y_pos_text.set(f'y: {y:.3f}')
         if z is not None:
             self.current_position['z'] = z
-            self.current_z_pos_text.set(f'z: {z:.2f}')
+            self.current_z_pos_text.set(f'z: {z:.3f}')
 
 class MainTkApplication():
 
@@ -128,7 +134,8 @@ class MainTkApplication():
         self.view.go_to_position_button.bind("<Button>", lambda e: self.go_to_position())
         self.view.read_position_button.bind("<Button>", lambda e: self.update_position())
 
-        #self.update_position()
+        self.update_position()
+        
     def run(self):
         self.root.title("NiDAQ - Jena Piezo Control")
         self.root.deiconify()
@@ -139,8 +146,8 @@ class MainTkApplication():
         current = self.view.current_position[axis]
         new = current + direction*delta
         kwargs = {axis:new}
-        #self.controller.go_to_position(**kwargs)
-        print(f'moving {axis}: {current:.2f} -> {new:.2f}')
+        self.controller.go_to_position(**kwargs)
+        logger.info(f'moving {axis}: {current:.3f} -> {new:.3f}')
         self.view.update_position(**kwargs)
 
     def update_position(self):
@@ -151,7 +158,8 @@ class MainTkApplication():
         gotox = float(self.view.go_to_x_position_entry.get())
         gotoy = float(self.view.go_to_y_position_entry.get())
         gotoz = float(self.view.go_to_z_position_entry.get())
-        print(f'go to: {gotox:.2f}, {gotoy:.2f}, {gotoz:.2f}')
+        self.controller.go_to_position(gotox, gotoy, gotoz)
+        logger.info(f'go to: {gotox:.3f}, {gotoy:.3f}, {gotoz:.3f}')
         self.view.update_position(gotox,gotoy,gotoz)
 
 def main():
