@@ -17,6 +17,8 @@ parser.add_argument('--piezo-read-channels', metavar = '<ch0,ch1,ch2>', default 
                     help='List of analog input channels used to read the piezo position')
 parser.add_argument('-q', '--quiet', action = 'store_true',
                     help='When true,logger level will be set to warning. Otherwise, set to "info".')
+parser.add_argument('-t', '--test', action = 'store_true',
+                    help='This is for development testing.')
 args = parser.parse_args()
 
 logger = logging.getLogger(__name__)
@@ -117,11 +119,9 @@ class MainApplicationView():
 
 class MainTkApplication():
 
-    def __init__(self):
+    def __init__(self, controller):
         self.root = tk.Tk()
-        self.controller = nipiezojenapy.PiezoControl(device_name = args.daq_name,
-                                      write_channels = args.piezo_write_channels.split(','),
-                                      read_channels = args.piezo_read_channels.split(','))
+        self.controller = controller
 
         self.view = MainApplicationView(self.root)
         self.view.plus_x_button.bind("<Button>",  lambda e: self._move('x',1))
@@ -135,9 +135,9 @@ class MainTkApplication():
         self.view.read_position_button.bind("<Button>", lambda e: self.update_position())
 
         self.update_position()
-        
+
     def run(self):
-        self.root.title("NiDAQ - Jena Piezo Control")
+        self.root.title("Piezo Control")
         self.root.deiconify()
         self.root.mainloop()
 
@@ -162,8 +162,17 @@ class MainTkApplication():
         logger.info(f'go to: {gotox:.3f}, {gotoy:.3f}, {gotoz:.3f}')
         self.view.update_position(gotox,gotoy,gotoz)
 
+def build_controller():
+    if args.test:
+        controller = nipiezojenapy.BaseControl()
+    else:
+        controller = nipiezojenapy.PiezoControl(device_name = args.daq_name,
+                                  write_channels = args.piezo_write_channels.split(','),
+                                  read_channels = args.piezo_read_channels.split(','))
+    return controller
+
 def main():
-    tkapp = MainTkApplication()
+    tkapp = MainTkApplication(build_controller())
     tkapp.run()
 
 if __name__ == '__main__':
