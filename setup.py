@@ -17,6 +17,7 @@ else:
 
 requirements = [
     'nidaqmx',
+    'numpy'
 ]
 
 # The README.md file content is included in the package metadata as long description and will be
@@ -40,4 +41,10 @@ setup(
     license='GPLv3',  # License tag
     install_requires=requirements,  # package dependencies
     python_requires='~=3.8',  # Specify compatible Python versions
+
+    entry_points={
+        'console_scripts': [
+            'qt3piezo = applications.tkcontrollerapp:main',
+        ],
+    }
 )
