@@ -17,6 +17,7 @@ else:
 
 requirements = [
     'nidaqmx',
+    'numpy'
 ]
 
 # The README.md file content is included in the package metadata as long description and will be

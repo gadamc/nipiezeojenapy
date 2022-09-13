@@ -3,6 +3,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import logging
 
+import numpy as np
+
 import nipiezojenapy
 
 
@@ -43,65 +45,62 @@ class MainApplicationView():
         ttk.Separator(frame, orient='vertical').grid(column=3, row=row, rowspan=5, sticky='ns')
 
         #right of the separator
-        self.go_to_position_button = tk.Button(frame, text="Go To Position")
+        self.go_to_position_button = tk.Button(frame, text="  Go To Position  ")
         self.go_to_position_button.grid(row=row, column=4, columnspan = 3, padx=5)
 
         row += 1
         #left of the separator
-        self.minus_x_button = tk.Button(frame, text="-")
+        self.minus_x_button = tk.Button(frame, text="  -  ")
         self.minus_x_button.grid(row=row, column=0,pady = 5)
         self.current_x_pos_text = tk.StringVar()
         tk.Label(frame, textvariable=self.current_x_pos_text).grid(row=row, column=1)
-        self.plus_x_button = tk.Button(frame, text="+")
+        self.plus_x_button = tk.Button(frame, text="  +  ")
         self.plus_x_button.grid(row=row, column=2, padx=(5,0))
 
         #right of the separator
-        tk.Label(frame, text='x (um): ').grid(row=row, column=4, padx = 5, pady=5)
-        self.go_to_x_position_entry = tk.Entry(frame, width=4)
-        self.go_to_x_position_entry.insert(5, 20.0)
-        self.go_to_x_position_entry.grid(row=row, column=5)
+        tk.Label(frame, text='x (um): ').grid(row=row, column=4, padx = 10, pady=5)
+        self.go_to_x_position_entry = tk.Entry(frame, width=6)
+        self.go_to_x_position_entry.grid(row=row, column=5, sticky="e")
 
         row += 1
         #left of the separator
-        self.minus_y_button = tk.Button(frame, text="-")
+        self.minus_y_button = tk.Button(frame, text="  -  ")
         self.minus_y_button.grid(row=row, column=0)
         self.current_y_pos_text = tk.StringVar()
         tk.Label(frame, textvariable=self.current_y_pos_text).grid(row=row, column=1)
-        self.plus_y_button = tk.Button(frame, text="+")
+        self.plus_y_button = tk.Button(frame, text="  +  ")
         self.plus_y_button.grid(row=row, column=2, padx=(5,0))
 
         #right of the separator
         tk.Label(frame, text='y (um): ').grid(row=row, column=4, padx = 5, pady=5)
-        self.go_to_y_position_entry = tk.Entry(frame, width=4)
-        self.go_to_y_position_entry.insert(5, 20.0)
-        self.go_to_y_position_entry.grid(row=row, column=5)
+        self.go_to_y_position_entry = tk.Entry(frame, width=6)
+        self.go_to_y_position_entry.grid(row=row, column=5, sticky="e")
 
         row += 1
         #left of the separator
-        self.minus_z_button = tk.Button(frame, text="-")
+        self.minus_z_button = tk.Button(frame, text="  -  ")
         self.minus_z_button.grid(row=row, column=0)
         self.current_z_pos_text = tk.StringVar()
         tk.Label(frame, textvariable=self.current_z_pos_text).grid(row=row, column=1)
-        self.plus_z_button = tk.Button(frame, text="+")
+        self.plus_z_button = tk.Button(frame, text="  +  ")
         self.plus_z_button.grid(row=row, column=2, padx=(5,0))
 
         #right of the separator
         tk.Label(frame, text='z (um): ').grid(row=row, column=4, padx = 5, pady=5)
-        self.go_to_z_position_entry = tk.Entry(frame, width=4)
-        self.go_to_z_position_entry.insert(5, 20.0)
-        self.go_to_z_position_entry.grid(row=row, column=5)
+        self.go_to_z_position_entry = tk.Entry(frame, width=6)
+        self.go_to_z_position_entry.grid(row=row, column=5, sticky="e")
 
         row += 1
         #left of the separator
         tk.Label(frame, text='step size (um): ').grid(row=row, column=0,  pady=5, columnspan=2)
         self.step_size_entry = tk.Entry(frame, width=4)
-        self.step_size_entry.insert(5, 0.25)
+        self.step_size_entry.insert(7, 0.25)
         self.step_size_entry.grid(row=row, column=2)
 
         row += 1
         #left of the separator
         self.read_position_button = tk.Button(frame, text="Refresh Position")
-        self.read_position_button.grid(row=row, column=0, pady = 5, columnspan=2)
+        self.read_position_button.grid(row=row, column=0, padx = 20,pady = 5, columnspan=2)
 
         self.update_position(20,20,20)
 
@@ -121,6 +120,7 @@ class MainTkApplication():
 
     def __init__(self, controller):
         self.root = tk.Tk()
+        self.root.minsize(200,150)
         self.controller = controller
 
         self.view = MainApplicationView(self.root)
@@ -135,6 +135,13 @@ class MainTkApplication():
         self.view.read_position_button.bind("<Button>", lambda e: self.update_position())
 
         self.update_position()
+
+        mid = self.controller.maximum_allowed_position - self.controller.minimum_allowed_position
+        mid = mid/2
+        mid = np.round(mid, 1)
+        self.view.go_to_x_position_entry.insert(0,mid)
+        self.view.go_to_y_position_entry.insert(0,mid)
+        self.view.go_to_z_position_entry.insert(0,mid)
 
     def run(self):
         self.root.title("Piezo Control")
