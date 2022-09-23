@@ -164,10 +164,13 @@ class MainTkApplication():
         current = self.view.current_position[axis]
         new = current + direction*delta
         kwargs = {axis:new}
-        self.controller.go_to_position(**kwargs)
-        logger.info(f'moving {axis}: {current:.3f} -> {new:.3f}')
-        self.view.update_position(**kwargs)
-
+        try:
+            self.controller.go_to_position(**kwargs)
+            logger.info(f'moving {axis}: {current:.3f} -> {new:.3f}')
+            self.view.update_position(**kwargs)
+        except ValueError as e:
+            logger.error(e)
+            
     def update_position(self):
         x, y, z = self.controller.get_current_position()
         self.view.update_position(x,y,z)
@@ -176,13 +179,16 @@ class MainTkApplication():
         gotox = float(self.view.go_to_x_position_entry.get())
         gotoy = float(self.view.go_to_y_position_entry.get())
         gotoz = float(self.view.go_to_z_position_entry.get())
-        self.controller.go_to_position(gotox, gotoy, gotoz)
-        logger.info(f'go to: {gotox:.3f}, {gotoy:.3f}, {gotoz:.3f}')
-        self.view.update_position(gotox,gotoy,gotoz)
+        try:
+            self.controller.go_to_position(gotox, gotoy, gotoz)
+            logger.info(f'go to: {gotox:.3f}, {gotoy:.3f}, {gotoz:.3f}')
+            self.view.update_position(gotox,gotoy,gotoz)
+        except ValueError as e:
+            logger.error(e)
 
     def capture_position(self):
         x, y, z = self.controller.get_current_position()
-        
+
         self.view.go_to_x_position_entry.delete(0,tk.END)
         self.view.go_to_y_position_entry.delete(0,tk.END)
         self.view.go_to_z_position_entry.delete(0,tk.END)
