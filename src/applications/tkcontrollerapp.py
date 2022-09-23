@@ -17,6 +17,8 @@ parser.add_argument('--piezo-write-channels', metavar = '<ch0,ch1,ch2>', default
                     help='List of analog output channels used to control the piezo position')
 parser.add_argument('--piezo-read-channels', metavar = '<ch0,ch1,ch2>', default = 'ai0,ai1,ai2', type=str,
                     help='List of analog input channels used to read the piezo position')
+parser.add_argument('-s', '--settle-time', metavar = 'settle_time', default = 0.01, type=float,
+                    help='Amount of time, in seconds, that are paused after moving to a new position. This allows for the device to "settle" into position.')
 parser.add_argument('-q', '--quiet', action = 'store_true',
                     help='When true,logger level will be set to warning. Otherwise, set to "info".')
 parser.add_argument('-t', '--test', action = 'store_true',
@@ -175,7 +177,8 @@ def build_controller():
     else:
         controller = nipiezojenapy.PiezoControl(device_name = args.daq_name,
                                   write_channels = args.piezo_write_channels.split(','),
-                                  read_channels = args.piezo_read_channels.split(','))
+                                  read_channels = args.piezo_read_channels.split(','),
+                                  move_settle_time = args.settle_time)
     return controller
 
 def main():

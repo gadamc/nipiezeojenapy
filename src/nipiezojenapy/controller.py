@@ -77,16 +77,19 @@ class PiezoControl(BaseControl):
     def __init__(self, device_name: str,
                        write_channels: List[str] = ['ao0','ao1','ao2'],
                        read_channels: List[str] = None,
-                       scale_microns_per_volt = 8) -> None:
+                       scale_microns_per_volt: float = 8,
+                       move_settle_time: float = 0.01,
+                       min_position: float = 0.0,
+                       max_position: float = 80.0) -> None:
         super().__init__()
 
         self.device_name = device_name
         self.write_channels = write_channels
         self.read_channels = read_channels
         self.scale_microns_per_volt = scale_microns_per_volt
-        self.minimum_allowed_position = 0.00
-        self.maximum_allowed_position = 80.0
-        self.settling_time_in_seconds = 0.200
+        self.minimum_allowed_position = min_position
+        self.maximum_allowed_position = max_position
+        self.settling_time_in_seconds = move_settle_time #10 millisecond settle time
         self.last_write_values = [None, None, None]
 
     def _microns_to_volts(self, microns: float) -> float:
