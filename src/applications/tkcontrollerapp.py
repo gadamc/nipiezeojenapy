@@ -109,8 +109,8 @@ class MainApplicationView():
         self.read_position_button.grid(row=row, column=0, padx = 20,pady = 5, columnspan=2)
 
         #right of the separator
-        self.read_position_button = tk.Button(frame, text="Refresh Position")
-        self.read_position_button.grid(row=row, column=0, padx = 20,pady = 5, columnspan=2)
+        self.capture_position_button = tk.Button(frame, text="Capture Position")
+        self.capture_position_button.grid(row=row, column=4, padx = 20,pady = 5, columnspan=2)
 
         self.update_position(20,20,20)
 
@@ -143,6 +143,7 @@ class MainTkApplication():
 
         self.view.go_to_position_button.bind("<Button>", lambda e: self.go_to_position())
         self.view.read_position_button.bind("<Button>", lambda e: self.update_position())
+        self.view.capture_position_button.bind("<Button>", lambda e: self.capture_position())
 
         self.update_position()
 
@@ -178,6 +179,17 @@ class MainTkApplication():
         self.controller.go_to_position(gotox, gotoy, gotoz)
         logger.info(f'go to: {gotox:.3f}, {gotoy:.3f}, {gotoz:.3f}')
         self.view.update_position(gotox,gotoy,gotoz)
+
+    def capture_position(self):
+        x, y, z = self.controller.get_current_position()
+        
+        self.view.go_to_x_position_entry.delete(0,tk.END)
+        self.view.go_to_y_position_entry.delete(0,tk.END)
+        self.view.go_to_z_position_entry.delete(0,tk.END)
+
+        self.view.go_to_x_position_entry.insert(0,np.round(x,3))
+        self.view.go_to_y_position_entry.insert(0,np.round(y,3))
+        self.view.go_to_z_position_entry.insert(0,np.round(z,3))
 
 def build_controller():
     if args.test:
