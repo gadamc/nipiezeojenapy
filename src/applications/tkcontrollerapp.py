@@ -26,7 +26,11 @@ parser.add_argument('-t', '--test', action = 'store_true',
 args = parser.parse_args()
 
 logger = logging.getLogger(__name__)
-logging.basicConfig()
+
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
+
 if args.quiet is False:
     logger.setLevel(level=logging.INFO)
 
@@ -101,6 +105,10 @@ class MainApplicationView():
 
         row += 1
         #left of the separator
+        self.read_position_button = tk.Button(frame, text="Refresh Position")
+        self.read_position_button.grid(row=row, column=0, padx = 20,pady = 5, columnspan=2)
+
+        #right of the separator
         self.read_position_button = tk.Button(frame, text="Refresh Position")
         self.read_position_button.grid(row=row, column=0, padx = 20,pady = 5, columnspan=2)
 
