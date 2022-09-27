@@ -78,7 +78,7 @@ class PiezoControl(BaseControl):
                        write_channels: List[str] = ['ao0','ao1','ao2'],
                        read_channels: List[str] = None,
                        scale_microns_per_volt: float = 8,
-                       move_settle_time: float = 0.01,
+                       move_settle_time: float = 0.001,
                        min_position: float = 0.0,
                        max_position: float = 80.0) -> None:
         super().__init__()
