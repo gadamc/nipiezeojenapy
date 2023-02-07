@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nipiezojenapy"
-dynamic = ["version"] # version is defined in __init__.py
+version = "1.0.1.dev1"
 
 description = "A package for controlling Jena PiezoSystem NV40 3CLE amplifier vi NIDAQMX."
 readme = "README.md"
@@ -56,5 +56,3 @@ dependencies = [
 [project.scripts]
 qt3piezo = "applications.tkcontrollerapp:main"
 
-[tool.setuptools.dynamic]
-version = {attr = "nipiezojenapy.__version__"}
