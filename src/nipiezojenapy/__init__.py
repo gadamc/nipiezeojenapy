@@ -1,2 +1,3 @@
-from .__version__ import __version__
 from .controller import PiezoControl, BaseControl
+
+__version__ = '1.0.1.dev0'

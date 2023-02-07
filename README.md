@@ -24,16 +24,17 @@ long as the access is not simultaneous.
 
 #### Requirements
 
-```
-pip install nidaqmx
-```
+This python package depends upon National Instruments driver and NI DAQ card
+that contains three analog input and output channels.
+
+You must first install the NI DAQmx driver. [http://www.ni.com/downloads/](http://www.ni.com/downloads/).
+
+PIP should install the rest of the dependencies.
 
 ### Local Installation
 
 ```
-git clone https://github.com/gadamc/nipiezojenapy
-cd nipiezojenapy
-python -m pip install .
+pip install nipiezojenapy
 ```
 
 ## Usage
