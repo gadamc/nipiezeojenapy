@@ -27,7 +27,8 @@ long as the access is not simultaneous.
 This python package depends upon National Instruments driver and NI DAQ card
 that contains three analog input and output channels.
 
-You must first install the NI DAQmx driver. [http://www.ni.com/downloads/](http://www.ni.com/downloads/).
+You must first install the NI DAQmx driver.
+[http://www.ni.com/downloads/](http://www.ni.com/downloads/).
 
 PIP should install the rest of the dependencies.
 
@@ -39,7 +40,17 @@ pip install nipiezojenapy
 
 ## Usage
 
-### Instantiate
+### GUI Application
+
+From the shell prompt, launch
+
+```
+> qt3piezo
+```
+
+For help on hardware configuration use the help option (`qt3piezo -h`)
+
+### Programmatically
 
 ```
 import nipiezojenapy
