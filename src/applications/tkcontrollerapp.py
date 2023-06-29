@@ -25,10 +25,8 @@ parser.add_argument('-t', '--test', action = 'store_true',
                     help='This is for development testing.')
 parser.add_argument('-pmin', '--piezo-min-position', metavar = 'microns', default = 0, type=float,
                     help='sets min allowed position on piezo controller.')
-
 parser.add_argument('-pmax', '--piezo-max-position', metavar = 'microns', default = 80, type=float,
                     help='sets min allowed position on piezo controller.')
-
 parser.add_argument('-pscale', '--piezo-scale-microns-per-volt', default = 8, type=float,
                     help='sets micron to volt scale for piezo controller.')
 
