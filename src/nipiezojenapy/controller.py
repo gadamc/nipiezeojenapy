@@ -6,9 +6,9 @@ from typing import List
 logger = logging.getLogger(__name__)
 
 class BaseControl:
-    def __init__(self):
-        self.minimum_allowed_position = 0.00
-        self.maximum_allowed_position = 80.0
+    def __init__(self, min_allowed_position = 0.0, max_allowed_position = 80.0):
+        self.minimum_allowed_position = min_allowed_position
+        self.maximum_allowed_position = max_allowed_position
         self.last_write_values = [0, 0, 0]
 
     def _validate_value(self, position: float) -> None:
@@ -81,7 +81,7 @@ class PiezoControl(BaseControl):
                        move_settle_time: float = 0.001,
                        min_position: float = 0.0,
                        max_position: float = 80.0) -> None:
-        super().__init__()
+        super().__init__(min_allowed_position = min_position, max_allowed_position = max_position)
 
         self.device_name = device_name
         self.write_channels = write_channels

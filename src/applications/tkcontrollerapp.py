@@ -23,6 +23,13 @@ parser.add_argument('-q', '--quiet', action = 'store_true',
                     help='When true,logger level will be set to warning. Otherwise, set to "info".')
 parser.add_argument('-t', '--test', action = 'store_true',
                     help='This is for development testing.')
+parser.add_argument('-pmin', '--piezo-min-position', metavar = 'microns', default = 0, type=float,
+                    help='sets min allowed position on piezo controller.')
+parser.add_argument('-pmax', '--piezo-max-position', metavar = 'microns', default = 80, type=float,
+                    help='sets min allowed position on piezo controller.')
+parser.add_argument('-pscale', '--piezo-scale-microns-per-volt', default = 8, type=float,
+                    help='sets micron to volt scale for piezo controller.')
+
 args = parser.parse_args()
 
 logger = logging.getLogger(__name__)
@@ -204,7 +211,10 @@ def build_controller():
         controller = nipiezojenapy.PiezoControl(device_name = args.daq_name,
                                   write_channels = args.piezo_write_channels.split(','),
                                   read_channels = args.piezo_read_channels.split(','),
-                                  move_settle_time = args.settle_time)
+                                  move_settle_time = args.settle_time,
+                                  min_position = args.piezo_min_position,
+                                  max_position = args.piezo_max_position,
+                                  scale_microns_per_volt = args.piezo_scale_microns_per_volt)
     return controller
 
 def main():
