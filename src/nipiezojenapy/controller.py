@@ -1,7 +1,7 @@
 import nidaqmx
 import logging
 import time
-from typing import List
+from typing import List, Union, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,8 @@ class PiezoControl(BaseControl):
     def __init__(self, device_name: str,
                        write_channels: List[str] = ['ao0','ao1','ao2'],
                        read_channels: List[str] = None,
-                       scale_microns_per_volt: float = 8,
+                       scale_microns_per_volt: Union[float, Tuple[float, float, float]] = 8,
+                       zero_microns_volt_offset: Union[float, Tuple[float, float, float]] = 0,
                        move_settle_time: float = 0.001,
                        min_position: float = 0.0,
                        max_position: float = 80.0) -> None:
@@ -86,17 +87,32 @@ class PiezoControl(BaseControl):
         self.device_name = device_name
         self.write_channels = write_channels
         self.read_channels = read_channels
-        self.scale_microns_per_volt = scale_microns_per_volt
+        if isinstance(scale_microns_per_volt, float):
+            self.scale_microns_per_volt = tuple([scale_microns_per_volt] * 3)
+        else:
+            self.scale_microns_per_volt = tuple(scale_microns_per_volt)
+            
+        if len(self.scale_microns_per_volt) != 3:
+            raise ValueError('scale_microns_per_volt must be a float or a list of three floats.')
+
+        if isinstance(zero_microns_volt_offset, float):
+            self.zero_microns_volt_offset = tuple([zero_microns_volt_offset] * 3)
+        else:
+            self.zero_microns_volt_offset = tuple(zero_microns_volt_offset)
+
+        if len(self.zero_microns_volt_offset) != 3:
+            raise ValueError('zero_microns_volt_offset must be a float or a list of three floats.')
+
         self.minimum_allowed_position = min_position
         self.maximum_allowed_position = max_position
         self.settling_time_in_seconds = move_settle_time #10 millisecond settle time
         self.last_write_values = [None, None, None]
 
-    def _microns_to_volts(self, microns: float) -> float:
-        return microns / self.scale_microns_per_volt
+    def _microns_to_volts(self, microns: float, axis: int) -> float:
+        return microns / self.scale_microns_per_volt[axis] + self.zero_microns_volt_offset[axis]
 
-    def _volts_to_microns(self, volts: float) -> float:
-        return  self.scale_microns_per_volt * volts
+    def _volts_to_microns(self, volts: float, axis: int) -> float:
+        return self.scale_microns_per_volt[axis] * (volts - self.zero_microns_volt_offset[axis])
 
 
     def go_to_position(self, x: float = None,
@@ -115,7 +131,7 @@ class PiezoControl(BaseControl):
             self._validate_value(val)
             with nidaqmx.Task() as task:
                 task.ao_channels.add_ao_voltage_chan(self.device_name + '/' + self.write_channels[idx])
-                task.write(self._microns_to_volts(val))
+                task.write(self._microns_to_volts(val, idx))
                 self.last_write_values[idx] = val
 
         debug_string = []
@@ -167,4 +183,4 @@ class PiezoControl(BaseControl):
             return self.last_write_values
 
         else:
-            return [self._volts_to_microns(v) for v in self.get_current_voltage()]
+            return [self._volts_to_microns(v, i) for i, v in enumerate(self.get_current_voltage())]
