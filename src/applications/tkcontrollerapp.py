@@ -18,7 +18,8 @@ parser.add_argument('--piezo-write-channels', metavar = '<ch0,ch1,ch2>', default
 parser.add_argument('--piezo-read-channels', metavar = '<ch0,ch1,ch2>', default = 'ai0,ai1,ai2', type=str,
                     help='List of analog input channels used to read the piezo position')
 parser.add_argument('-s', '--settle-time', metavar = 'settle_time', default = 0.01, type=float,
-                    help='Amount of time, in seconds, that are paused after moving to a new position. This allows for the device to "settle" into position.')
+                    help='''Amount of time, in seconds, that are paused after moving to a new position. 
+This allows for the device to "settle" into position.''')
 parser.add_argument('-q', '--quiet', action = 'store_true',
                     help='When true,logger level will be set to warning. Otherwise, set to "info".')
 parser.add_argument('-t', '--test', action = 'store_true',
@@ -27,8 +28,11 @@ parser.add_argument('-pmin', '--piezo-min-position', metavar = 'microns', defaul
                     help='sets min allowed position on piezo controller.')
 parser.add_argument('-pmax', '--piezo-max-position', metavar = 'microns', default = 80, type=float,
                     help='sets min allowed position on piezo controller.')
-parser.add_argument('-pscale', '--piezo-scale-microns-per-volt', default = 8, type=float,
-                    help='sets micron to volt scale for piezo controller.')
+parser.add_argument('-pscale', '--piezo-scale-microns-per-volt', nargs = "*", default = [8], type=float,
+                    help='sets micron to volt scale for piezo controller for all channels or each channel individually.')
+parser.add_argument('-poffset', '--piezo-scale-volts-offset', nargs = "*", default = [0], type=float,
+                    help='''sets volt offset value for piezo controller for all channels or each channel individually. 
+This is the applied voltage that defines the position x, y, z = 0, 0, 0.''')
 
 args = parser.parse_args()
 
@@ -208,13 +212,24 @@ def build_controller():
     if args.test:
         controller = nipiezojenapy.BaseControl()
     else:
+        if len(args.piezo_scale_microns_per_volt) == 1:
+            piezo_scale_microns_per_volt = args.piezo_scale_microns_per_volt * 3
+        else:
+            piezo_scale_microns_per_volt = args.piezo_scale_microns_per_volt
+
+        if len(args.piezo_scale_volts_offset) == 1:
+            piezo_scale_volts_offset = args.piezo_scale_volts_offset * 3
+        else:
+            piezo_scale_volts_offset = args.piezo_scale_volts_offset
+
         controller = nipiezojenapy.PiezoControl(device_name = args.daq_name,
                                   write_channels = args.piezo_write_channels.split(','),
                                   read_channels = args.piezo_read_channels.split(','),
                                   move_settle_time = args.settle_time,
                                   min_position = args.piezo_min_position,
                                   max_position = args.piezo_max_position,
-                                  scale_microns_per_volt = args.piezo_scale_microns_per_volt)
+                                  scale_microns_per_volt = piezo_scale_microns_per_volt,
+                                  zero_microns_volt_offset = piezo_scale_volts_offset)
     return controller
 
 def main():

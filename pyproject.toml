@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nipiezojenapy"
-version = "1.0.2.dev0"
+version = "1.0.3.dev0"
 
 description = "A package for controlling Jena PiezoSystem NV40 3CLE amplifier vi NIDAQMX."
 readme = "README.md"
