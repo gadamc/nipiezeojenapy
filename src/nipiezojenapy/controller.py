@@ -77,8 +77,8 @@ class PiezoControl(BaseControl):
     def __init__(self, device_name: str,
                        write_channels: List[str] = ['ao0','ao1','ao2'],
                        read_channels: List[str] = None,
-                       scale_microns_per_volt: Union[float, Tuple[float, float, float]] = 8,
-                       zero_microns_volt_offset: Union[float, Tuple[float, float, float]] = 0,
+                       scale_microns_per_volt: Union[float, int, Tuple[float, float, float]] = 8,
+                       zero_microns_volt_offset: Union[float, int, Tuple[float, float, float]] = 0,
                        move_settle_time: float = 0.001,
                        min_position: float = 0.0,
                        max_position: float = 80.0) -> None:
@@ -87,21 +87,9 @@ class PiezoControl(BaseControl):
         self.device_name = device_name
         self.write_channels = write_channels
         self.read_channels = read_channels
-        if isinstance(scale_microns_per_volt, float):
-            self.scale_microns_per_volt = tuple([scale_microns_per_volt] * 3)
-        else:
-            self.scale_microns_per_volt = tuple(scale_microns_per_volt)
-            
-        if len(self.scale_microns_per_volt) != 3:
-            raise ValueError('scale_microns_per_volt must be a float or a list of three floats.')
 
-        if isinstance(zero_microns_volt_offset, float):
-            self.zero_microns_volt_offset = tuple([zero_microns_volt_offset] * 3)
-        else:
-            self.zero_microns_volt_offset = tuple(zero_microns_volt_offset)
-
-        if len(self.zero_microns_volt_offset) != 3:
-            raise ValueError('zero_microns_volt_offset must be a float or a list of three floats.')
+        self.scale_microns_per_volt = scale_microns_per_volt
+        self.zero_microns_volt_offset = zero_microns_volt_offset
 
         self.minimum_allowed_position = min_position
         self.maximum_allowed_position = max_position
@@ -114,6 +102,38 @@ class PiezoControl(BaseControl):
     def _volts_to_microns(self, volts: float, axis: int) -> float:
         return self.scale_microns_per_volt[axis] * (volts - self.zero_microns_volt_offset[axis])
 
+    def _convert_value_to_ntuple(self, value, n=3) -> Tuple:
+        logger.debug(f'converting {value} of type {type(value)}')
+        tuple_value = None
+        if isinstance(value, (float, int)):
+            tuple_value = (value,) * n
+        elif isinstance(value, list):
+            tuple_value = tuple(value)
+        elif isinstance(value, tuple):
+            tuple_value = value
+        else:
+            raise ValueError(f'value must be an int, float or a list/tuple of {n} ints or floats.')
+        if len(tuple_value) != n:
+            raise ValueError(f'value must be of length {n}. got {len(tuple_value)}')
+
+        logger.debug(f'new var = {tuple_value}')
+        return tuple_value
+
+    @property
+    def scale_microns_per_volt(self) -> Tuple[float, float, float]:
+        return self._scale_microns_per_volt
+
+    @scale_microns_per_volt.setter
+    def scale_microns_per_volt(self, value: Union[float, int, Tuple[float, float, float]]) -> None:
+        self._scale_microns_per_volt = self._convert_value_to_ntuple(value, 3)
+
+    @property
+    def zero_microns_volt_offset(self) -> Tuple[float, float, float]:
+        return self._zero_microns_volt_offset
+
+    @zero_microns_volt_offset.setter
+    def zero_microns_volt_offset(self, value: Union[float, int, Tuple[float, float, float]]) -> None:
+        self._zero_microns_volt_offset = self._convert_value_to_ntuple(value, 3)
 
     def go_to_position(self, x: float = None,
                              y: float = None,
